@@ -51,3 +51,19 @@ button {
 button:hover {
     background-color: #45a049;
 }
+
+botao-simples {
+src: url(/tabela-pescados.csv);
+  background-color: #3498db;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+botao-simples:hover {
+  background-color: #2980b9;
+}
