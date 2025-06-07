@@ -53,7 +53,6 @@ button:hover {
 }
 
 botao-simples {
-src: url(/tabela-pescados.csv);
   background-color: #3498db;
   color: white;
   padding: 10px 20px;
