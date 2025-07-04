@@ -1,29 +1,96 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/jpg" href="/img/Catfish vermelho em destaque.png">
-    <title>Pescando Dados</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pescando Dados</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    .container { max-width: 800px; margin: auto; }
+    input#searchInput {
+      width: 100%;
+      padding: 8px;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+    th, td { border: 1px solid #aaa; padding: 6px; text-align: left; }
+    th { background-color: #f0f0f0; }
+    button { padding: 8px 12px; cursor: pointer; }
+    .hidden { display: none; }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h1>Tem interesse em alevinos?</h1>
+    <p>Esta é uma página que lhe ajudará a encontrar informações de maneira fácil e prática...</p>
 
-    <div class="container">
-        <h1>Tem interesse em alevinos?</h1>
-        <p>Esta é uma página que lhe ajudará a encontrar informações de maneira fácil e prática, para ajudar no dia a dia dos piscicultores.</p>
-        <button onclick="mostrarMensagem()">Clique em mim!</button>
-    </div>
+    <!-- Barra de pesquisa -->
+    <input type="text" id="searchInput" placeholder="🔍 Pesquise na tabela..." />
 
-    <script>
-        function mostrarMensagem() {
-            alert('Você é MUITO GAY');
-        }
-    </script>
+    <!-- Botão para carregar o arquivo CSV -->
+    <input type="file" id="fileInput" accept=".csv" />
 
-<a href="tabela-pescados.csv" target="_blank" rel="noopener">
-  <button class="botao-simples">Ver PDF</button>
-</a>
+    <!-- Local para a tabela -->
+    <div id="tabela-container"></div>
+  </div>
 
+  <script>
+    document.getElementById('fileInput').addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      if (file && file.name.endsWith('.csv')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const texto = e.target.result;
+          const linhas = texto.trim().split("\n");
+          if (linhas.length === 0) {
+            document.getElementById('tabela-container').textContent = "CSV vazio.";
+            return;
+          }
+
+          const table = document.createElement("table");
+          const thead = document.createElement("thead");
+          const trHead = document.createElement("tr");
+          linhas[0].split(",").forEach(col => {
+            const th = document.createElement("th");
+            th.textContent = col;
+            trHead.appendChild(th);
+          });
+          thead.appendChild(trHead);
+          table.appendChild(thead);
+
+         const tbody = document.createElement("tbody");
+          linhas.slice(1).forEach(linha => {
+          const tr = document.createElement("tr");
+          linha.split(",").forEach(cel => {
+          const valor = parseFloat(cel.trim().replace(",", "."));
+          const td = document.createElement("td");
+          td.textContent = isNaN(valor) ? cel : valor.toFixed(2);
+         tr.appendChild(td);
+         });
+         tbody.appendChild(tr);
+         });
+
+          table.appendChild(tbody);
+          document.getElementById('tabela-container').appendChild(table);
+
+          const input = document.getElementById("searchInput");
+          input.addEventListener("keyup", function() {
+            const filtro = input.value.toLowerCase();
+            Array.from(tbody.rows).forEach(row => {
+              const textoRow = row.textContent.toLowerCase();
+              row.classList.toggle("hidden", !textoRow.includes(filtro));
+            });
+          });
+        };
+        reader.readAsText(file);
+      } else {
+        alert("Por favor, selecione um arquivo CSV válido.");
+      }
+    });
+  </script>
 </body>
 </html>
