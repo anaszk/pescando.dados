@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pescando Dados</title>
-  <link rel="stylesheet" href="style.css">
   <style>
     body { font-family: sans-serif; margin: 20px; }
     .container { max-width: 800px; margin: auto; }
@@ -56,29 +55,32 @@
           const trHead = document.createElement("tr");
           linhas[0].split(",").forEach(col => {
             const th = document.createElement("th");
-            th.textContent = col;
+            th.textContent = col.replace(/"/g, "").trim();
             trHead.appendChild(th);
           });
           thead.appendChild(trHead);
           table.appendChild(thead);
 
-         const tbody = document.createElement("tbody");
+          const tbody = document.createElement("tbody");
           linhas.slice(1).forEach(linha => {
-          const tr = document.createElement("tr");
-          linha.split(",").forEach(cel => {
-          const valor = parseFloat(cel.trim().replace(",", "."));
-          const td = document.createElement("td");
-          td.textContent = isNaN(valor) ? cel : valor.toFixed(2);
-         tr.appendChild(td);
-         });
-         tbody.appendChild(tr);
-         });
+            const tr = document.createElement("tr");
+            linha.split(",").forEach(cel => {
+              const celulaLimpa = cel.trim().replace(/["R$\s]/g, "").replace(".", "").replace(",", ".");
+              const valor = parseFloat(celulaLimpa);
+              const td = document.createElement("td");
+              td.textContent = isNaN(valor) ? cel.replace(/["]/g, "").trim() : `R$ ${valor.toFixed(2)}`;
+              tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+          });
 
           table.appendChild(tbody);
-          document.getElementById('tabela-container').appendChild(table);
+          const container = document.getElementById('tabela-container');
+          container.innerHTML = ""; // Limpa se já houver tabela
+          container.appendChild(table);
 
           const input = document.getElementById("searchInput");
-          input.addEventListener("keyup", function() {
+          input.addEventListener("keyup", function () {
             const filtro = input.value.toLowerCase();
             Array.from(tbody.rows).forEach(row => {
               const textoRow = row.textContent.toLowerCase();
