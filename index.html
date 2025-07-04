@@ -6,7 +6,7 @@
   <title>Pescando Dados</title>
   <style>
     body { font-family: sans-serif; margin: 20px; }
-    .container { max-width: 800px; margin: auto; }
+    .container { max-width: 1000px; margin: auto; }
     input#searchInput {
       width: 100%;
       padding: 8px;
@@ -18,7 +18,6 @@
     table { border-collapse: collapse; width: 100%; margin-top: 10px; }
     th, td { border: 1px solid #aaa; padding: 6px; text-align: left; }
     th { background-color: #f0f0f0; }
-    button { padding: 8px 12px; cursor: pointer; }
     .hidden { display: none; }
   </style>
 </head>
@@ -53,32 +52,46 @@
           const table = document.createElement("table");
           const thead = document.createElement("thead");
           const trHead = document.createElement("tr");
-          linhas[0].split(",").forEach(col => {
+
+          // Cabeçalhos
+          const cabecalhos = parseCSVLinha(linhas[0]);
+          cabecalhos.forEach(col => {
             const th = document.createElement("th");
-            th.textContent = col.replace(/"/g, "").trim();
+            th.textContent = col.replace(/["]/g, "").trim();
             trHead.appendChild(th);
           });
           thead.appendChild(trHead);
           table.appendChild(thead);
 
+          // Corpo da tabela
           const tbody = document.createElement("tbody");
           linhas.slice(1).forEach(linha => {
             const tr = document.createElement("tr");
-            linha.split(",").forEach(cel => {
-              const celulaLimpa = cel.trim().replace(/["R$\s]/g, "").replace(".", "").replace(",", ".");
-              const valor = parseFloat(celulaLimpa);
+            const colunas = parseCSVLinha(linha);
+
+            colunas.forEach(cel => {
+              const celLimpa = cel.trim().replace(/["]/g, "");
+              const celNumerica = celLimpa
+                .replace(/R\$\s?/g, "")
+                .replace(/\./g, "")
+                .replace(",", ".");
+
+              const valor = parseFloat(celNumerica);
               const td = document.createElement("td");
-              td.textContent = isNaN(valor) ? cel.replace(/["]/g, "").trim() : `R$ ${valor.toFixed(2)}`;
+              td.textContent = isNaN(valor) ? celLimpa : `R$ ${valor.toFixed(2)}`;
               tr.appendChild(td);
             });
+
             tbody.appendChild(tr);
           });
 
           table.appendChild(tbody);
+
           const container = document.getElementById('tabela-container');
-          container.innerHTML = ""; // Limpa se já houver tabela
+          container.innerHTML = "";
           container.appendChild(table);
 
+          // Filtro
           const input = document.getElementById("searchInput");
           input.addEventListener("keyup", function () {
             const filtro = input.value.toLowerCase();
@@ -93,6 +106,23 @@
         alert("Por favor, selecione um arquivo CSV válido.");
       }
     });
+
+    // Função para parsear linha CSV com aspas e vírgulas corretamente
+    function parseCSVLinha(linha) {
+      const regex = /("([^"]|"")*"|[^,]+)(?=\s*,|\s*$)/g;
+      const campos = [];
+      let match;
+
+      while ((match = regex.exec(linha)) !== null) {
+        let campo = match[0].trim();
+        if (campo.startsWith('"') && campo.endsWith('"')) {
+          campo = campo.slice(1, -1).replace(/""/g, '"');
+        }
+        campos.push(campo);
+      }
+
+      return campos;
+    }
   </script>
 </body>
 </html>
